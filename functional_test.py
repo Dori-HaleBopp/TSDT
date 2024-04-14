@@ -29,19 +29,28 @@ class NewVisitorTest(unittest.TestCase):
             'Enter a to-do item'
         )
         #她在一个文本框中输入了“Buy flowers"
-        inputbox.send_keys('Give a gift to Lisi')
+        inputbox.send_keys('Buy flowers')
+        inputbox.send_keys(Keys.ENTER)
+        time.sleep(1)
+        table=self.browser.find_element(By.ID,'id_list_table')
+        rows=table.find_elements(By.TAG_NAME,'tr')
+        self.assertIn('1:Buy flowers',[row.text for row in rows])
+#Give a gift to Lisi
 
         #她按回车键后，页面更新了
         #待办事项表格中显示了“1:Buy flowers”
+        #页面中又显示了一个文本框，可以输入其他待办事项
+        inputbox = self.browser.find_element(By.ID,'id_new_item')
+        inputbox.send_keys('Give a gift to Lisi')
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
+        time.sleep(1)  # 等待页面刷新
 
         table=self.browser.find_element(By.ID,'id_list_table')
         rows=table.find_elements(By.TAG_NAME,'tr')
         self.assertIn('1:Buy flowers',[row.text for row in rows])
         self.assertIn('2:Give a gift to Lisi',[row.text for row in rows])
 
-        #页面中又显示了一个文本框，可以输入其他待办事项
+        
         #她输入了“gift to girlfriend”
         self.fail('Finish the test!')
 
