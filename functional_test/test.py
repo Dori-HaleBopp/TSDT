@@ -3,6 +3,9 @@ from selenium.webdriver.common.keys import Keys
 import time
 from selenium.webdriver.common.by import By
 from django.test import LiveServerTestCase
+from selenium.common.exceptions import WebDriverException
+
+MAX_WAIT = 10
 
 class NewVisitorTest(LiveServerTestCase):
 
@@ -11,6 +14,19 @@ class NewVisitorTest(LiveServerTestCase):
 
     def tearDown(self):
         self.browser.quit()
+
+    def wait_for_row_in_list_table(self, row_text):
+        start_time = time.time()
+        while True:
+            try:
+                table = self.browser.find_element(By.ID, 'id_list_table')
+                rows = table.find_elements(By.TAG_NAME, 'tr')
+                self.assertIn(row_text, [row.text for row in rows])
+                return
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time > MAX_WAIT:
+                    raise e
+                time.sleep(0.5)
 
     def test_can_start_a_list_and_retrieve_it_later(self):
         # Edith has heard about a cool new online to-do app. She goes
@@ -31,7 +47,8 @@ class NewVisitorTest(LiveServerTestCase):
         #她在一个文本框中输入了“Buy flowers"
         inputbox.send_keys('Buy flowers')
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
+        self.wait_for_row_in_list_table('1:Buy flowers')
+
         table=self.browser.find_element(By.ID,'id_list_table')
         rows=table.find_elements(By.TAG_NAME,'tr')
         self.assertIn('1:Buy flowers',[row.text for row in rows])
@@ -43,7 +60,9 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox = self.browser.find_element(By.ID,'id_new_item')
         inputbox.send_keys('Give a gift to Lisi')
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)  # 等待页面刷新
+        
+        self.wait_for_row_in_list_table('1:Buy flowers')
+        self.wait_for_row_in_list_table('2:Give a gift to Lisi')
 
         table=self.browser.find_element(By.ID,'id_list_table')
         rows=table.find_elements(By.TAG_NAME,'tr')
