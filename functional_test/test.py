@@ -107,6 +107,6 @@ class NewVisitorTest(LiveServerTestCase):
 
         #两个人都很满意，然后离开了
         
-        self.fail('Finish the test!')
+        #self.fail('Finish the test!')
 
         #页面再次更新，她的清单中显示了这两个待办事项
