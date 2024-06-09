@@ -3,6 +3,12 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
+def set_default_list_id(apps, schema_editor):
+    Item = apps.get_model('lists', 'Item')
+    List = apps.get_model('lists', 'List')
+    default_list = List.objects.first()
+    if default_list is not None:
+        Item.objects.filter(list_id__isnull=True).update(list=default_list)
 
 class Migration(migrations.Migration):
     dependencies = [
